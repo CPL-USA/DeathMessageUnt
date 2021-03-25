@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace DeathMessage
 {
-    public class DeathMessage : RocketPlugin
+    public class DeathMessage : RocketPlugin<Configuration>
     {
         public static DeathMessage Instance;
 
@@ -33,11 +33,60 @@ namespace DeathMessage
         
         private void PlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
         {
-            
+            UnturnedPlayer killer = UnturnedPlayer.FromCSteamID(murderer);
+            switch (limb)
+            {
+                case ELimb.LEFT_FOOT:
+                    killer.Experience += Configuration.Instance.left_foot.Exp;
+                    break;
+                case ELimb.LEFT_LEG:
+                    killer.Experience += Configuration.Instance.left_leg.Exp;
+                    break;
+                case ELimb.RIGHT_FOOT:
+                    killer.Experience += Configuration.Instance.right_foot.Exp;
+                    break;
+                case ELimb.RIGHT_LEG:
+                    killer.Experience += Configuration.Instance.right_leg.Exp;
+                    break;
+                case ELimb.LEFT_HAND:
+                    killer.Experience += Configuration.Instance.left_hand.Exp;
+                    break;
+                case ELimb.LEFT_ARM:
+                    killer.Experience += Configuration.Instance.left_arm.Exp;
+                    break;
+                case ELimb.RIGHT_HAND:
+                    killer.Experience += Configuration.Instance.right_hand.Exp;
+                    break;
+                case ELimb.RIGHT_ARM:
+                    killer.Experience += Configuration.Instance.right_arm.Exp;
+                    break;
+                case ELimb.LEFT_BACK:
+                    killer.Experience += Configuration.Instance.left_back.Exp;
+                    break;
+                case ELimb.RIGHT_BACK:
+                    killer.Experience += Configuration.Instance.right_back.Exp;
+                    break;
+                case ELimb.LEFT_FRONT:
+                    killer.Experience += Configuration.Instance.left_front.Exp;
+                    break;
+                case ELimb.RIGHT_FRONT:
+                    killer.Experience += Configuration.Instance.right_front.Exp;
+                    break;
+                case ELimb.SPINE:
+                    killer.Experience += Configuration.Instance.spine.Exp;
+                    break;
+                case ELimb.SKULL:
+                    killer.Experience += Configuration.Instance.skull.Exp;
+                    break;
+            }
+
             if (cause == EDeathCause.GUN || cause == EDeathCause.MELEE || cause == EDeathCause.MISSILE || cause == EDeathCause.PUNCH || cause == EDeathCause.ROADKILL || cause == EDeathCause.GRENADE)
             {
-                UnturnedPlayer killer = UnturnedPlayer.FromCSteamID(murderer);
                 ChatManager.serverSendMessage(Translate("death_message_" + cause.ToString().ToLower(), killer.CharacterName, player.CharacterName), Color.white, null, null, EChatMode.GLOBAL, null, true);
+            }
+            else if (cause == EDeathCause.GUN && limb == ELimb.SKULL) 
+            {
+                ChatManager.serverSendMessage(Translate("death_message_gun_in_skull", killer.CharacterName, player.CharacterName), Color.white, null, null, EChatMode.GLOBAL, null, true);
             }
             else
             {
@@ -49,8 +98,9 @@ namespace DeathMessage
 
         public override TranslationList DefaultTranslations => new TranslationList()
         {
+            {"death_message_gun_in_skull", "<color=red>{0}</color> застрелил <color=red>{1}</color> в голову." },
             {"death_message_gun", " <color=red>{0}</color> застрелил <color=red>{1}</color>" },
-            {"death_message_missile", "<color=red>{0}</color> взорвал <color=red>{1}</color>"},
+            {"death_message_missile", "<color=red>{0}</color> взорвал <color=red>{1}</color>" },
             {"death_message_melee", "<color=red>{0}</color> зарезал <color=red>{1}</color>" },
             {"death_message_punch", "<color=red>{0}</color> забил <color=red>{1}</color>" },
 
