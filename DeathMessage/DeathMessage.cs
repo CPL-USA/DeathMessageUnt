@@ -22,18 +22,37 @@ namespace DeathMessage
         protected override void Load()
         {
             Instance = this;
-            UnturnedPlayerEvents.OnPlayerDeath += PlayerDeath;
+            UnturnedPlayerEvents.OnPlayerDeath += onPlayerDeath;
         }
 
 
         protected override void Unload()
         {
-            UnturnedPlayerEvents.OnPlayerDeath -= PlayerDeath;
+            UnturnedPlayerEvents.OnPlayerDeath -= onPlayerDeath;
         }
-        
-        private void PlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
+
+        private void onPlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
         {
             UnturnedPlayer killer = UnturnedPlayer.FromCSteamID(murderer);
+
+            if (cause == EDeathCause.GUN && limb == ELimb.SKULL)
+            {
+                ChatManager.serverSendMessage(Translate("death_message_gun_in_skull", killer.CharacterName, player.CharacterName), Color.white, null, null, EChatMode.GLOBAL, null, true);
+                experienceForKill(killer, limb);
+            }
+            else if (cause == EDeathCause.GUN || cause == EDeathCause.MELEE || cause == EDeathCause.MISSILE || cause == EDeathCause.PUNCH || cause == EDeathCause.ROADKILL || cause == EDeathCause.GRENADE)
+            {
+                ChatManager.serverSendMessage(Translate("death_message_" + cause.ToString().ToLower(), killer.CharacterName, player.CharacterName), Color.white, null, null, EChatMode.GLOBAL, null, true);
+                experienceForKill(killer, limb);
+            }
+            else
+            {
+                ChatManager.serverSendMessage(Translate("death_message_" + cause.ToString().ToLower(), player.CharacterName), Color.white, null, null, EChatMode.GLOBAL, null, true);
+            }
+        }
+
+        private void experienceForKill(UnturnedPlayer killer, ELimb limb)
+        {
             switch (limb)
             {
                 case ELimb.LEFT_FOOT:
@@ -79,21 +98,8 @@ namespace DeathMessage
                     killer.Experience += Configuration.Instance.skull.Exp;
                     break;
             }
-
-            if (cause == EDeathCause.GUN || cause == EDeathCause.MELEE || cause == EDeathCause.MISSILE || cause == EDeathCause.PUNCH || cause == EDeathCause.ROADKILL || cause == EDeathCause.GRENADE)
-            {
-                ChatManager.serverSendMessage(Translate("death_message_" + cause.ToString().ToLower(), killer.CharacterName, player.CharacterName), Color.white, null, null, EChatMode.GLOBAL, null, true);
-            }
-            else if (cause == EDeathCause.GUN && limb == ELimb.SKULL) 
-            {
-                ChatManager.serverSendMessage(Translate("death_message_gun_in_skull", killer.CharacterName, player.CharacterName), Color.white, null, null, EChatMode.GLOBAL, null, true);
-            }
-            else
-            {
-                ChatManager.serverSendMessage(Translate("death_message_" + cause.ToString().ToLower(), player.CharacterName), Color.white, null, null, EChatMode.GLOBAL, null, true);
-            }
-
         }
+        
 
 
         public override TranslationList DefaultTranslations => new TranslationList()
@@ -132,6 +138,8 @@ namespace DeathMessage
             {"death_message_burner", "<color=red>{0}</color> умер от пылающего зомби." },
             {"death_message_spit", "<color=red>{0}</color> умер от кислоты." },
             {"death_message_acid", "<color=red>{0}</color> умер от кислоты." },
+
+            {"death_message_shred", "<color=red>{0}</color> порезался." },
 
         };
 
